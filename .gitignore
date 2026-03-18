@@ -1,0 +1,5 @@
+node_modules/
+campusfix.db
+public/uploads/
+.env
+*.log
