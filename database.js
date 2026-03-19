@@ -97,7 +97,7 @@ async function initDB() {
   if (!studentExists) {
     const hash = bcrypt.hashSync('student123', 10);
     await run(db, "INSERT INTO users (name, email, password, roll_number, department, role) VALUES (?, ?, ?, ?, ?, 'student')",
-      ['Arjun Sharma', 'student@campusfix.edu', hash, 'CS2021001', 'Computer Science']);
+      ['Aditya Kale', 'student@campusfix.edu', hash, 'CS2024001', 'Computer Science']);
   }
 
   // Seed complaints
