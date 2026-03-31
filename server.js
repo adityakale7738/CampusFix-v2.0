@@ -21,6 +21,7 @@ app.use(session({
 initDB().then(({ db, run, get, all }) => {
   app.use('/api/auth', require('./routes/auth')(db, run, get, all));
   app.use('/api/complaints', require('./routes/complaints')(db, run, get, all));
+  app.use(express.static(path.join(__dirname, 'public')));
 
   app.get('/', (req, res) => res.sendFile(path.join(__dirname, 'public', 'index.html')));
   app.get('/dashboard', (req, res) => res.sendFile(path.join(__dirname, 'public', 'dashboard.html')));
