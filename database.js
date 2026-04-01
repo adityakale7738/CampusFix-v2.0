@@ -1,3 +1,4 @@
+require('dotenv').config();
 const sqlite3 = require('sqlite3').verbose();
 const path = require('path');
 const bcrypt = require('bcryptjs');
@@ -78,13 +79,11 @@ async function initDB() {
     );
   `);
 
-  // Add missing columns if upgrading from old DB
   try { await run(db, "ALTER TABLE complaints ADD COLUMN priority TEXT DEFAULT 'Medium'"); } catch(e) {}
   try { await run(db, "ALTER TABLE complaints ADD COLUMN location TEXT"); } catch(e) {}
   try { await run(db, "ALTER TABLE users ADD COLUMN department TEXT"); } catch(e) {}
   try { await run(db, "ALTER TABLE users ADD COLUMN phone TEXT"); } catch(e) {}
 
-  // Seed admin
   const adminExists = await get(db, "SELECT id FROM users WHERE email = 'admin@campusfix.edu'");
   if (!adminExists) {
     const hash = bcrypt.hashSync('admin123', 10);
@@ -92,23 +91,21 @@ async function initDB() {
     console.log('✅ Admin created: admin@campusfix.edu / admin123');
   }
 
-  // Seed student
   const studentExists = await get(db, "SELECT id FROM users WHERE email = 'student@campusfix.edu'");
   if (!studentExists) {
     const hash = bcrypt.hashSync('student123', 10);
     await run(db, "INSERT INTO users (name, email, password, roll_number, department, role) VALUES (?, ?, ?, ?, ?, 'student')",
-      ['Aditya Kale', 'student@campusfix.edu', hash, 'CS2024001', 'Computer Science']);
+      ['Aditya Kale', 'student@campusfix.edu', hash, 'CS2021001', 'Computer Science']);
   }
 
-  // Seed complaints
   const countRow = await get(db, "SELECT COUNT(*) as cnt FROM complaints");
   if (countRow.cnt === 0) {
     const student = await get(db, "SELECT id FROM users WHERE email = 'student@campusfix.edu'");
     if (student) {
       const samples = [
         { cid: 'CF-0001', title: 'Water leakage in hostel room 204', category: 'Hostel', priority: 'High', desc: 'Major water leakage from ceiling in room 204, Block B. Floor is always wet causing inconvenience and safety hazard.', status: 'In Progress', location: 'Block B, Room 204' },
-        { cid: 'CF-0002', title: 'Wi-Fi not working in Library', category: 'Internet', priority: 'High', desc: 'Wi-Fi has been down for 3 days. Students unable to access online resources for assignments.', status: 'Pending', location: 'Central Library' },
-        { cid: 'CF-0003', title: 'Broken projector in Lab 3', category: 'Classroom', priority: 'Medium', desc: 'Projector in Computer Lab 3 broken for over a week. Affecting practical sessions.', status: 'Resolved', location: 'Computer Lab 3' },
+        { cid: 'CF-0002', title: 'Wi-Fi not working in Library', category: 'Internet', priority: 'High', desc: 'The Wi-Fi connection in the library has been down for 3 days. Students unable to access online resources.', status: 'Pending', location: 'Central Library' },
+        { cid: 'CF-0003', title: 'Broken projector in Lab 3', category: 'Classroom', priority: 'Medium', desc: 'The projector in Computer Lab 3 has been broken for over a week. Affecting practical sessions.', status: 'Resolved', location: 'Computer Lab 3' },
         { cid: 'CF-0004', title: 'Street lights not working near hostel', category: 'Electricity', priority: 'High', desc: 'Multiple street lights near hostel gate not working. Safety concern at night.', status: 'Pending', location: 'Hostel Gate Area' },
         { cid: 'CF-0005', title: 'Dustbins overflowing in canteen area', category: 'Cleanliness', priority: 'Low', desc: 'Dustbins in canteen area have not been cleaned for 2 days. Bad smell and hygiene issue.', status: 'Pending', location: 'Main Canteen' },
       ];
